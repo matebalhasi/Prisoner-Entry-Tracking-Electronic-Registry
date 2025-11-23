@@ -38,7 +38,7 @@ class PrisonerListUI(BaseWindow):
         for p in prisoners:
             item = ctk.CTkLabel(
                 self.list_frame,
-                text=f"{p['F_Name']} {p['L_Name']} | Cell: {p['Cell_Number']} | Danger: {p['Danger_Level']}",
+                text=f"{p['F_Name']} {p['L_Name']} | Cell: {p['Cell_Number']} | Danger: {p['Danger_Level']} | Birth date: {p['Birth_Date']}",
                 font=ctk.CTkFont(size=16),
                 text_color="white"
             )

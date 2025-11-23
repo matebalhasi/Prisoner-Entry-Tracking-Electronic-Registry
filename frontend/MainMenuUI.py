@@ -1,9 +1,15 @@
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import ttk
-from frontend.interface.PrisonerListUI import PrisonerListUI
-from frontend.request.PrisonerRequest import PrisonerRequest
 
+from frontend.interface.PrisonerListUI import PrisonerListUI
+from frontend.interface.PrisonerAddUI import PrisonerAddUI
+from frontend.interface.PrisonerMoveUI import PrisonerMoveUI
+from frontend.interface.GuardListUI import GuardListUI
+from frontend.interface.GuardScheduleUI import GuardScheduleUI
+
+from frontend.request.PrisonerRequest import PrisonerRequest
+from frontend.request.GuardRequest import GuardRequest
 
 class MainMenuUI:
     def __init__(self, user=None):
@@ -11,7 +17,8 @@ class MainMenuUI:
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
-        self.prisoner_request = PrisonerRequest("http://localhost:8000")
+        self.prisoner_request = PrisonerRequest("http://127.0.0.1:8000")
+        self.guard_request = GuardRequest("http://127.0.0.1:8000")
 
         # Ablak
         self.root = ctk.CTk()
@@ -112,12 +119,12 @@ class MainMenuUI:
     # ABLAKOK TARTALMA
     def prisoner_window(self, frame):
         self.create_sub_button(frame, "Lista megnyitása", self.open_prisoner_list)
-        self.create_sub_button(frame, "Új fogvatartott felvétele")
-        self.create_sub_button(frame, "Áthelyezés")
+        self.create_sub_button(frame, "Új fogvatartott felvétele", self.open_prisoner_add)
+        self.create_sub_button(frame, "Áthelyezés", self.open_prisoner_move)
 
     def guard_window(self, frame):
-        self.create_sub_button(frame, "Őrök listája")
-        self.create_sub_button(frame, "Beosztások")
+        self.create_sub_button(frame, "Őrök listája", self.open_guard_list)
+        self.create_sub_button(frame, "Beosztások", self.open_guard_schedule)
 
     def map_window(self, frame):
         self.create_sub_button(frame, "Térkép")
@@ -140,20 +147,41 @@ class MainMenuUI:
         """Ide jön majd a backend funkció."""
         print("Megnyitott subfeature:", feature_name)
 
+    def open_prisoner_add(self):
+        win = PrisonerAddUI(
+            backend_url="http://127.0.0.1:8000",
+            prisoner_request=self.prisoner_request
+        )
+        win.run()
+
+    def open_prisoner_move(self):
+        win = PrisonerMoveUI(
+            backend_url="http://127.0.0.1:8000",
+            prisoner_request=self.prisoner_request
+        )
+        win.run()
+
+    def open_guard_list(self):
+        win = GuardListUI(
+            backend_url="http://127.0.0.1:8000",
+            guard_request=self.guard_request
+        )
+        win.run()
+
+
+    def open_guard_schedule(self):
+        win = GuardScheduleUI(
+            backend_url="http://127.0.0.1:8000",
+            guard_request=self.guard_request
+        )
+        win.run()
+
     def back_to_menu(self):
         # eltüntetjük az aktuális win-t, visszaállítjuk a menüt
         if hasattr(self, "win"):
             self.win.pack_forget()
         self.menu_content.pack(padx=80, pady=60, fill="both", expand=True)
 
-    def logout(self):
-        self.root.destroy()
-
-    # FUTTATÁS
-    def run(self):
-        self.root.mainloop()
-
-    
     def open_prisoner_list(self):
         win = PrisonerListUI(
             backend_url="http://127.0.0.1:8000",
@@ -161,6 +189,12 @@ class MainMenuUI:
         )
         win.run()
 
+    def logout(self):
+        self.root.destroy()
+
+    # FUTTATÁS
+    def run(self):
+        self.root.mainloop()
 
 
 if __name__ == "__main__":
