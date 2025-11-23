@@ -1,12 +1,17 @@
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import ttk
+from frontend.interface.PrisonerListUI import PrisonerListUI
+from frontend.request.PrisonerRequest import PrisonerRequest
+
 
 class MainMenuUI:
     def __init__(self, user=None):
         self.user = user
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
+
+        self.prisoner_request = PrisonerRequest("http://localhost:8000")
 
         # Ablak
         self.root = ctk.CTk()
@@ -106,7 +111,7 @@ class MainMenuUI:
 
     # ABLAKOK TARTALMA
     def prisoner_window(self, frame):
-        self.create_sub_button(frame, "Lista megnyitása")
+        self.create_sub_button(frame, "Lista megnyitása", self.open_prisoner_list)
         self.create_sub_button(frame, "Új fogvatartott felvétele")
         self.create_sub_button(frame, "Áthelyezés")
 
@@ -117,7 +122,7 @@ class MainMenuUI:
     def map_window(self, frame):
         self.create_sub_button(frame, "Térkép")
 
-    def create_sub_button(self, frame, text):
+    def create_sub_button(self, frame, text, command=None):
         ctk.CTkButton(
             frame,
             text=text,
@@ -127,7 +132,7 @@ class MainMenuUI:
             fg_color="#2A8AC0",
             hover_color="#1F6AA5",
             font=ctk.CTkFont(size=16, weight="bold"),
-            command=lambda: self.open_subfeature(text)
+            command=command if command else lambda: self.open_subfeature(text)
         ).pack(pady=10)
 
     # FUNKCIÓK
@@ -147,6 +152,15 @@ class MainMenuUI:
     # FUTTATÁS
     def run(self):
         self.root.mainloop()
+
+    
+    def open_prisoner_list(self):
+        win = PrisonerListUI(
+            backend_url="http://127.0.0.1:8000",
+            prisoner_request=self.prisoner_request
+        )
+        win.run()
+
 
 
 if __name__ == "__main__":
