@@ -1,4 +1,4 @@
-import requests
+import api_requests
 
 
 class GuardRequest:
@@ -8,7 +8,7 @@ class GuardRequest:
     def get_all_guards(self):
         """Őrök listázása"""
         try:
-            r = requests.get(f"{self.backend_url}/guards")
+            r = api_requests.get(f"{self.backend_url}/guards")
             return r.json() if r.status_code == 200 else []
         except:
             return []
@@ -16,7 +16,7 @@ class GuardRequest:
     def get_guard_schedule(self, guard_id: int):
         """Őr beosztás lekérése"""
         try:
-            r = requests.get(f"{self.backend_url}/guards/{guard_id}/schedule")
+            r = api_requests.get(f"{self.backend_url}/guards/{guard_id}/schedule")
             return r.json() if r.status_code == 200 else []
         except:
             return []

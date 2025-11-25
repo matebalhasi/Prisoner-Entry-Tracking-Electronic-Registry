@@ -1,10 +1,12 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import mysql.connector
 from mysql.connector import Error
 import threading
 import tkinter as tk
 from tkinter import messagebox
-from Prisoner_Backend import get_all_prisoners, add_prisoner, move_prisoner
+
+import PrisonerBackend
+
 
 
 app = Flask(__name__)
@@ -36,30 +38,35 @@ def check_db():
     else:
         return jsonify({"status":503, "message":"Az adatbazis nem elerheto"}),503
 
+
+@app.route("/prisoners", methods=["GET"])
+def get_prisoners():
+    try:
+        result = PrisonerBackend.get_all_prisoners()
+        return jsonify(result), result.get("status", 500)
+    except Exception as e:
+        return jsonify({"status": 500, "error": str(e)}), 500
+
+
+@app.route("/prisoners/add", methods=["POST"])
+def add_prisoner():
+    data = request.json
+    result = PrisonerBackend.add_prisoner(data)
+    return jsonify(result), result.get("status", 500)
+
+
+
+
+@app.route("/prisoners/<int:pid>/move", methods=["PUT"])
+def move_prisoner(pid):
+    data = request.get_json(silent=True) or{}
+    new_cell = data.get("new_cell")
+
+    result = PrisonerBackend.move_prisoner(pid, new_cell)
+    return jsonify(result), result.get("Status",500)
+
+
 if __name__ == "__main__":
     print("A backend a http:127.0.0.1:5000-ren fut")
     app.run(debug=True)
 
-
-@app.route("/prisoners", methods=["GET"])
-def route_get_all_prisoners():
-    return jsonify(get_all_prisoners()),200
-
-@app.route("/prisoners/add", methods=["POST"])
-def route_add_prisoners():
-    data = requests.json
-    if not data or "name" not in data or "cell" not in data:
-        return jsonify({"error": "Hibas informacio"}), 400
-    result = add_prisoner(data)
-    status = 201 if "id" in result else 500
-    return jsonify(result), status
-
-@app.route("/prisoners/<int:pid>/move", methods=["PUT"])
-def route_move_prisoner(pid):
-    data = request.json
-    new_cell = data.get("new_cell")
-    if new_cell is None:
-        return jsonify({"error": "Missing new_cell"}), 400
-    result = move_prisoner(pid, new_cell)
-    status = 200 if "error" not in result else 500
-    return jsonify(result), status
