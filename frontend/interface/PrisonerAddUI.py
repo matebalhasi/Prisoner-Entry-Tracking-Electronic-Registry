@@ -18,8 +18,8 @@ class PrisonerAddUI(BaseWindow):
         ).pack(pady=20)
 
         # INPUT MEZŐK
-        self.f_name = self._input(frame, "Keresztnév")
         self.l_name = self._input(frame, "Vezetéknév")
+        self.f_name = self._input(frame, "Keresztnév")
         self.birth = self._input(frame, "Születési dátum (YYYY-MM-DD)")
         self.danger = self._input(frame, "Veszélyességi szint")
         self.cell = self._input(frame, "Cellaszám")

@@ -7,9 +7,13 @@ from frontend.interface.PrisonerAddUI import PrisonerAddUI
 from frontend.interface.PrisonerMoveUI import PrisonerMoveUI
 from frontend.interface.GuardListUI import GuardListUI
 from frontend.interface.GuardScheduleUI import GuardScheduleUI
+from frontend.interface.CellsUI import CellsUI
+#from frontend.interface.MapUI import MapUI
+
 
 from frontend.request.PrisonerRequest import PrisonerRequest
 from frontend.request.GuardRequest import GuardRequest
+from frontend.request.CellsRequest import CellsRequest
 
 class MainMenuUI:
     def __init__(self, user=None):
@@ -19,6 +23,8 @@ class MainMenuUI:
 
         self.prisoner_request = PrisonerRequest("http://127.0.0.1:8000")
         self.guard_request = GuardRequest("http://127.0.0.1:8000")
+        self.cells_request = CellsRequest("http://127.0.0.1:8000")
+
 
         # Ablak
         self.root = ctk.CTk()
@@ -127,7 +133,11 @@ class MainMenuUI:
         self.create_sub_button(frame, "Beosztások", self.open_guard_schedule)
 
     def map_window(self, frame):
-        self.create_sub_button(frame, "Térkép")
+        self.create_sub_button(frame, "Blokk 1", lambda: self.open_cells_by_block(1))
+        self.create_sub_button(frame, "Blokk 2", lambda: self.open_cells_by_block(2))
+        self.create_sub_button(frame, "Blokk 3", lambda: self.open_cells_by_block(3))
+        #self.create_sub_button(frame, "Térkép", lambda: self.open_map)
+        
 
     def create_sub_button(self, frame, text, command=None):
         ctk.CTkButton(
@@ -144,7 +154,7 @@ class MainMenuUI:
 
     # FUNKCIÓK
     def open_subfeature(self, feature_name):
-        """Ide jön majd a backend funkció."""
+        
         print("Megnyitott subfeature:", feature_name)
 
     def open_prisoner_add(self):
@@ -173,6 +183,22 @@ class MainMenuUI:
         win = GuardScheduleUI(
             backend_url="http://127.0.0.1:8000",
             guard_request=self.guard_request
+        )
+        win.run()
+    """
+    def open_map(self):
+        print("map start")
+        win = MapUI(
+            backend_url="http://127.0.0.1:8000",
+            map_request=self.map_request
+        )
+        win.run()
+    """
+    def open_cells_by_block(self, block_id):
+        win = CellsUI(
+            backend_url="http://127.0.0.1:8000",
+            cells_request=self.cells_request,
+            block_id=block_id
         )
         win.run()
 
