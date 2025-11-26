@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 import PrisonerBackend
-
+import GuardBackend
 
 
 app = Flask(__name__)
@@ -39,6 +39,9 @@ def check_db():
         return jsonify({"status":503, "message":"Az adatbazis nem elerheto"}),503
 
 
+
+# Prisoners Endjointjai --------
+
 @app.route("/prisoners", methods=["GET"])
 def get_prisoners():
     try:
@@ -54,9 +57,6 @@ def add_prisoner():
     result = PrisonerBackend.add_prisoner(data)
     return jsonify(result), result.get("status", 500)
 
-
-
-
 @app.route("/prisoners/<int:pid>/move", methods=["PUT"])
 def move_prisoner(pid):
     data = request.get_json(silent=True) or{}
@@ -65,6 +65,24 @@ def move_prisoner(pid):
     result = PrisonerBackend.move_prisoner(pid, new_cell)
     return jsonify(result), result.get("Status",500)
 
+
+# Guardok Endpointjai -------
+
+
+@app.route("/guards", methods = ["GET"])
+def get_all_guards():
+    try:
+        result = GuardBackend.get_all_guards()
+        return jsonify(result), result.get("status" , 500)
+    except Exception as e:
+        return jsonify({"status":500,"error":str(e)}),500
+
+@app.route("/guards/<int:guard_id>/schedule", methods = ["GET"])
+def get_guard_schedule(guard_id):
+    result = GuardBackend.get_guard_schedule(guard_id)
+    if "error" in result:
+        return jsonify(result), 500
+    return jsonify(result),200
 
 if __name__ == "__main__":
     print("A backend a http:127.0.0.1:5000-ren fut")

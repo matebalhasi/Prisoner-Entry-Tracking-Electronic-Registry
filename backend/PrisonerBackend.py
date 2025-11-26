@@ -1,13 +1,28 @@
 import mysql.connector
+from mysql.connector import Error
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+HOST = os.getenv("HOST", "localhost")
+USER = os.getenv("USER", "root")
+PASSWORD = os.getenv("PASSWORD", "")
+DATABASE = os.getenv("DATABASE", "prisondb")
+
+
+def get_connection():
+    return mysql.connector.connect(
+        host=HOST,
+        user=USER,
+        password=PASSWORD,
+        database=DATABASE
+    )
+
 
 def get_all_prisoners():
     try:
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="",
-            database="prisondb"
-        )
+        conn = get_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM prisoner")
         data = cursor.fetchall()
@@ -18,12 +33,7 @@ def get_all_prisoners():
 
 def add_prisoner(data: dict):
     try:
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="",
-            database="prisondb"
-        )
+        conn = get_connection()
         cursor = conn.cursor()
         sql = """
         INSERT INTO prisoner (F_Name, L_Name, Birth_Date, Danger_Level, Cell_Number)
@@ -45,12 +55,7 @@ def add_prisoner(data: dict):
 
 def move_prisoner(pid: int, new_cell: int):
     try:
-        conn = mysql.connector.connect(
-            host="127.0.0.1",
-            user="root",
-            password="",
-            database="prisondb"
-        )
+        conn = get_connection()
         cursor = conn.cursor()
         sql = "UPDATE prisoner SET Cell_Number=%s WHERE ID=%s"
         cursor.execute(sql, (new_cell, pid))

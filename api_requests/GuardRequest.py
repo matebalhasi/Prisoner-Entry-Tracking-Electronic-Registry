@@ -1,4 +1,4 @@
-import api_requests
+import requests
 
 
 class GuardRequest:
@@ -8,15 +8,18 @@ class GuardRequest:
     def get_all_guards(self):
         """Őrök listázása"""
         try:
-            r = api_requests.get(f"{self.backend_url}/guards")
-            return r.json() if r.status_code == 200 else []
-        except:
+            r = requests.get(f"{self.backend_url}/guards")
+            json_data = r.json() if r.status_code == 200 else {}
+            return json_data.get("data", [])  # itt kivesszük a 'data' kulcsot
+        except Exception as e:
             return []
+
 
     def get_guard_schedule(self, guard_id: int):
         """Őr beosztás lekérése"""
         try:
-            r = api_requests.get(f"{self.backend_url}/guards/{guard_id}/schedule")
+            r = requests.get(f"{self.backend_url}/guards/{guard_id}/schedule")
             return r.json() if r.status_code == 200 else []
-        except:
-            return []
+        except Exception as e:
+            print("Hiba a get_guard_schedule hívásnál:", e)
+            return {"status": 500, "data": [], "error": str(e)}

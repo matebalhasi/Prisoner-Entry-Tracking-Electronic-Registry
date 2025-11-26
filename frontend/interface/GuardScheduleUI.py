@@ -1,13 +1,19 @@
 import customtkinter as ctk
 from frontend.interface.BaseUI import BaseWindow
-
+from tkinter import messagebox
 
 class GuardScheduleUI(BaseWindow):
-    def __init__(self, backend_url, guard_request):
-        super().__init__("Őr beosztása")
+    def __init__(self, guard_request, master=None):
+        if master:
+            self.root = ctk.CTkToplevel(master)
+            self.root.transient(master)
+            self.root.grab_set()
+        else:
+            self.root = ctk.CTk()
+        self.root.title("Őr beosztása")
+        self.root.geometry("800x500")
 
         self.request = guard_request
-        self.backend_url = backend_url
 
         frame = ctk.CTkFrame(self.root, fg_color="transparent")
         frame.pack(padx=30, pady=30, fill="both", expand=True)
@@ -34,17 +40,35 @@ class GuardScheduleUI(BaseWindow):
         self.list_frame.pack(pady=20, fill="both", expand=True)
 
     def load_schedule(self):
+        # Régi widgetek törlése
         for widget in self.list_frame.winfo_children():
             widget.destroy()
 
-        guard_id = self.guard_id_entry.get()
-
-        schedule = self.request.get_guard_schedule(int(guard_id))
-
-        if not schedule:
-            ctk.CTkLabel(self.list_frame, text="Nincs beosztás.").pack()
+        guard_id_str = self.guard_id_entry.get()
+        if not guard_id_str.isdigit():
+            messagebox.showerror("Hiba", "Az Őr ID csak szám lehet.")
             return
 
-        for s in schedule:
-            text = f"Nap: {s['Day']}  |  Műszak: {s['Shift']}"
-            ctk.CTkLabel(self.list_frame, text=text).pack(anchor="w", padx=10, pady=5)
+        guard_id = int(guard_id_str)
+
+        try:
+            schedule_data = self.request.get_guard_schedule(guard_id)
+            print("DEBUG schedule_data:", schedule_data)
+        except Exception as e:
+            messagebox.showerror("Hiba", f"Beosztás lekérése sikertelen: {str(e)}")
+            return
+
+        # Ha nincs adat vagy üres lista
+        if not schedule_data or ("data" in schedule_data and not schedule_data["data"]):
+            ctk.CTkLabel(self.list_frame, text="Nincs beosztás.").pack(pady=10)
+            return
+
+        # Feldolgozás
+        shifts = schedule_data.get("data", schedule_data)  # lehet lista vagy dict['data']
+        for s in shifts:
+            day = s.get("Shift_Day", "?")
+            shift_type = s.get("Shift_Type", "?")
+            start_time = s.get("Start_Time", "?")
+            end_time = s.get("End_Time", "?")
+            text = f"Nap: {day}  |  Műszak: {shift_type}  |  Kezdés: {start_time}  |  Befejezés: {end_time}"
+            ctk.CTkLabel(self.list_frame, text=text, font=ctk.CTkFont(size=16)).pack(anchor="w", padx=10, pady=5)

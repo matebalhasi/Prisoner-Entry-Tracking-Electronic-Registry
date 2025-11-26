@@ -88,8 +88,8 @@ class PrisonerListUI:
                 except:
                     birth_date = birth_raw
 
-                item_text = f"ID: {p.get('ID', '?')} | {p.get('F_Name', '?')} {p.get('L_Name', '?')} | " \
-                            f"Cell: {p.get('Cell_Number', '?')} | " \
+                item_text = f"ID: {p.get('Guard_ID', '?')} | {p.get('F_Name', '?')} {p.get('L_Name', '?')} | " \
+                            f": {p.get('Cell_Number', '?')} | " \
                             f"Danger: {p.get('Danger_Level', '?')} | " \
                             f"Birth date: {birth_date}"
 

@@ -1,6 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 from tkinter import ttk
+from tkinter import messagebox
 
 from frontend.interface.PrisonerListUI import PrisonerListUI
 from frontend.interface.PrisonerAddUI import PrisonerAddUI
@@ -162,19 +163,20 @@ class MainMenuUI:
 
 
     def open_guard_list(self):
-        win = GuardListUI(
-          
-            guard_request=self.guard_request
+        GuardListUI(
+            guard_request=self.guard_request,
+            master=self.root
         )
-        win.run()
+        
 
 
     def open_guard_schedule(self):
-        win = GuardScheduleUI(
+        GuardScheduleUI(
     
-            guard_request=self.guard_request
+            guard_request=self.guard_request,
+            master = self.root
         )
-        win.run()
+        
 
     def back_to_menu(self):
         # eltüntetjük az aktuális win-t, visszaállítjuk a menüt
@@ -188,7 +190,14 @@ class MainMenuUI:
 
         
     def logout(self):
-        self.root.destroy()
+        confirm = messagebox.askyesno(
+        "Kilépés megerősítése", 
+        "Biztosan ki szeretnél lépni az alkalmazásból?"
+        )
+        if confirm:
+          self.root.destroy()
+
+
 
     # FUTTATÁS
     def run(self):
