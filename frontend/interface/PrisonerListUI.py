@@ -9,7 +9,7 @@ class PrisonerListUI:
         if master:
             self.root = ctk.CTkToplevel(master)
             self.root.transient(master) 
-            self.root.grab_set() 
+            #self.root.grab_set() 
         else:
             self.root = ctk.CTk()
 
@@ -88,10 +88,10 @@ class PrisonerListUI:
                 except:
                     birth_date = birth_raw
 
-                item_text = f"ID: {p.get('Guard_ID', '?')} | {p.get('F_Name', '?')} {p.get('L_Name', '?')} | " \
-                            f": {p.get('Cell_Number', '?')} | " \
-                            f"Danger: {p.get('Danger_Level', '?')} | " \
-                            f"Birth date: {birth_date}"
+                item_text = f"ID: {p.get('ID', '?')} | {p.get('F_Name', '?')} {p.get('L_Name', '?')} | " \
+                            f"Cella: {p.get('Cell_Number', '?')} | " \
+                            f"Veszélyeségi szint: {p.get('Danger_Level', '?')} | " \
+                            f"Születési dátum: {birth_date}"
 
 
                 item = ctk.CTkLabel(

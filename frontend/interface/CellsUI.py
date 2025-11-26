@@ -1,82 +1,121 @@
 import customtkinter as ctk
+from tkinter import messagebox, simpledialog, Toplevel, Label
 from frontend.interface.BaseUI import BaseWindow
 
 
 class CellsUI(BaseWindow):
-    def __init__(self, backend_url, cells_request, block_id):
-        super().__init__("Cella térkép")
+    def __init__(self, cells_request, master = None):
+        if master:
+            self.root = ctk.CTkToplevel(master)
+            self.root.transient(master)
+            #self.root.grab_set()
+        else:
+            self.root = ctk.CTk()
+        
+        self.root.title("Cella Lista")
+        self.root.geometry("800x600")
 
         self.req = cells_request
-        self.backend_url = backend_url
-        self.block_id = block_id
-
+        self.block_id = None
+        
         frame = ctk.CTkFrame(self.root, fg_color="transparent")
         frame.pack(padx=20, pady=20, fill="both", expand=True)
 
         title = ctk.CTkLabel(
             frame,
-            text=f"Cella lista – Blokk: {block_id}",
+            text="Cella keresés",
             font=ctk.CTkFont(size=26, weight="bold")
         )
         title.pack(pady=10)
 
-        # Cella gombok helye
-        self.cell_frame = ctk.CTkScrollableFrame(frame, width=700, height=350)
-        self.cell_frame.pack(pady=15)
-
-        # Fogvatartott adatok helye
-        self.result_frame = ctk.CTkFrame(frame, fg_color="transparent")
-        self.result_frame.pack(pady=10, fill="both", expand=True)
-
-        self.load_cells()
 
 
-    # Cella gombok
-    def load_cells(self):
-        cells = self.req.get_cells_by_block(self.block_id)
+        
 
-        if not cells:
-            ctk.CTkLabel(self.cell_frame, text="Nincs cella ebben a blokkban.").pack()
+        self.cell_frame = ctk.CTkScrollableFrame(frame, width=700, height=400)
+        self.cell_frame.pack(pady=10, fill="both", expand=True)
+
+
+        self.ask_block_id()
+    def ask_block_id(self):
+        block_id = simpledialog.askinteger(
+            "Blokk kiválasztása",
+            "Add meg a blokk ID-t:",
+            parent = self.root
+        )
+        if block_id is None:
+            self.root.destroy()
             return
+        
+        self.block_id = block_id
+        self.load_cells()
+    
+    
+    def load_cells(self):
 
+        for w in self.cell_frame.winfo_children():
+
+            w.destroy()
+        try:
+            cells = self.req.get_cells_by_block(self.block_id)
+            print("DEBUG: Visszakapott JSON:", cells)
+
+        except Exception as e:
+            messagebox.showerror("Hiba",f"A backend nem elérhető: {str(e)}")
+            cells = []
+        if not cells:
+            ctk.CTkLabel(
+                self.cell_frame, 
+                text=f"Nincs cella a {self.block_id}. blokkban."
+            ).pack(pady=10)
+            return
         for c in cells:
-            cell_number = c["Cell_Number"]
-
-            ctk.CTkButton(
+            cell_number = c.get("Cell_Number", "?")
+            lbl = ctk.CTkLabel(
                 self.cell_frame,
                 text=f"Cella {cell_number}",
-                width=200,
+                font=ctk.CTkFont(size=16),
                 fg_color="#2A8AC0",
-                hover_color="#1F6AA5",
-                command=lambda cn=cell_number: self.load_cell_prisoners(cn)
-            ).pack(pady=6)
+                corner_radius=5,
+                width=200,
+                pady=5
+            )
+            lbl.pack(pady=5, padx=10, anchor="w")
+            lbl.bind("<Double-1>", lambda e, cn=cell_number: self.open_prisoners(cn))
 
     
-    # Fogvatartottak a cellában
-    def load_cell_prisoners(self, cell_number):
-        # Eredmény terület törlése
-        for w in self.result_frame.winfo_children():
-            w.destroy()
-
-        prisoners = self.req.get_prisoners_in_cell(cell_number)
-
-        ctk.CTkLabel(
-            self.result_frame,
-            text=f"Cella {cell_number} – Fogvatartottak:",
-            font=ctk.CTkFont(size=20, weight="bold")
-        ).pack(pady=5)
+    
+    def open_prisoners(self, cell_number):
+        try:
+            prisoners = self.req.get_prisoner_in_cell(cell_number)
+        except Exception as e:
+            messagebox.showerror("Hiba", f"A backend nem elérhető: {str(e)}")
+            prisoners = []
+        win = Toplevel(self.root)
+        win.title(f"Fogvatartottak - Cella {cell_number}")
+        win.geometry("500x400")
 
         if not prisoners:
-            ctk.CTkLabel(self.result_frame, text="A cella üres.").pack()
+            Label(win, text="A cella üres.").pack(pady=10)
             return
+
+        Label(
+            win, 
+            text=f"Fogvatartottak a {cell_number} cellában:", 
+            font=("Arial", 14, "bold")
+        ).pack(pady=10)
 
         for p in prisoners:
             text = (
-                f"{p['L_Name']} {p['F_Name']} {p['Birth_Date']}  |  "
-                f"Veszélyességi szint: {p['Danger_Level']}"
+                f"{p.get('L_Name', '?')} {p.get('F_Name', '?')} | "
+                f"Születési dátum: {p.get('Birth_Date', '?')} | "
+                f"Veszélyességi szint: {p.get('Danger_Level', '?')}"
             )
-            ctk.CTkLabel(
-                self.result_frame,
-                text=text,
-                font=ctk.CTkFont(size=16)
-            ).pack(anchor="w", pady=4)
+            Label(
+                win, 
+                text=text, 
+                anchor="w", 
+                justify="left"
+            ).pack(fill="x", padx=10, pady=4)
+
+    

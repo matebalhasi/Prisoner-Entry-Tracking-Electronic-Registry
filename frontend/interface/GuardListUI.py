@@ -9,7 +9,7 @@ class GuardListUI:
         if master:
             self.root = ctk.CTkToplevel(master)
             self.root.transient(master)
-            self.root.grab_set()
+            #self.root.grab_set()
         else:
             self.root = ctk.CTk()
         

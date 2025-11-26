@@ -84,6 +84,37 @@ def get_guard_schedule(guard_id):
         return jsonify(result), 500
     return jsonify(result),200
 
+
+
+@app.route("/blocks)",methods = ["GET"])
+def get_all_blocks():
+    try:
+        result = PrisonerBackend.get_all_blocks()
+        return jsonify(result), result.get("status", 500)
+    except Exception as e:
+        return jsonify({"status": 500, "error": str(e)}), 500
+
+
+
+@app.route("/cells/blocks/<int:block_id>", methods=["GET"])
+def get_cells_by_block(block_id):
+    try:
+        cells = PrisonerBackend.get_cells_by_block(block_id)
+        return jsonify(cells), 200
+    except Exception as e:
+        return jsonify({"status": 500, "error": str(e)}), 500
+    
+@app.route("/cells/<int:cell_number>/prisoners", methods=["GET"])
+def get_prisoners_in_cell(cell_number):
+    try:
+        prisoners = PrisonerBackend.get_prisoners_in_cell(cell_number)
+        return jsonify(prisoners), 200
+    except Exception as e:
+        return jsonify({"status": 500, "error": str(e)}), 500
+
+
+
+
 if __name__ == "__main__":
     print("A backend a http:127.0.0.1:5000-ren fut")
     app.run(debug=True)

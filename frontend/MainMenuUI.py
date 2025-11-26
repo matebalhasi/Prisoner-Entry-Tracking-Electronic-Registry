@@ -2,15 +2,22 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter import simpledialog
+import os
+from dotenv import load_dotenv
 
 from frontend.interface.PrisonerListUI import PrisonerListUI
 from frontend.interface.PrisonerAddUI import PrisonerAddUI
 from frontend.interface.PrisonerMoveUI import PrisonerMoveUI
 from frontend.interface.GuardListUI import GuardListUI
 from frontend.interface.GuardScheduleUI import GuardScheduleUI
+from frontend.interface.CellsUI import CellsUI
 
 from api_requests.PrisonerRequest import PrisonerRequest
 from api_requests.GuardRequest import GuardRequest
+from api_requests.CellsRequest import CellsRequest
+
+
 
 class MainMenuUI:
     def __init__(self, user=None):
@@ -18,14 +25,23 @@ class MainMenuUI:
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
-        self.prisoner_request = PrisonerRequest("http://127.0.0.1:5000")
-        self.guard_request = GuardRequest("http://127.0.0.1:5000")
+       
 
         # Ablak
         self.root = ctk.CTk()
         self.root.title("Főmenü")
         # Érdemes a canvas méretével egyező ablakméretet használni
         self.root.geometry("1024x600")
+
+        load_dotenv()
+
+        backend_url = os.getenv("BACKEND_URL", "http://127.0.0.1:5000")
+
+
+        self.prisoner_request = PrisonerRequest(backend_url)
+        self.guard_request = GuardRequest(backend_url)
+        self.cells_request = CellsRequest(backend_url)
+
 
         # Háttér canvas (ha később képet szeretnél, ide lehet betenni)
         self.bg_canvas = tk.Canvas(self.root, width=1024, height=600,
@@ -64,7 +80,7 @@ class MainMenuUI:
         # GOMBOK
         self.create_menu_button("Fogvatartottak", lambda: self.open_window("Fogvatartottak", self.prisoner_window))
         self.create_menu_button("Őrök", lambda: self.open_window("Személyzet", self.guard_window))
-        self.create_menu_button("Térkép", lambda: self.open_window("Térkép", self.map_window))
+        self.create_menu_button("Cella keresés", self.search_cells)
 
         self.create_menu_button("Kilépés", self.logout)
 
@@ -127,8 +143,7 @@ class MainMenuUI:
         self.create_sub_button(frame, "Őrök listája", self.open_guard_list)
         self.create_sub_button(frame, "Beosztások", self.open_guard_schedule)
 
-    def map_window(self, frame):
-        self.create_sub_button(frame, "Térkép")
+  
 
     def create_sub_button(self, frame, text, command=None):
         ctk.CTkButton(
@@ -147,6 +162,12 @@ class MainMenuUI:
     def open_subfeature(self, feature_name):
         """Ide jön majd a backend funkció."""
         print("Megnyitott subfeature:", feature_name)
+
+    def open_prisoner_list(self):
+        PrisonerListUI(
+            prisoner_request=self.prisoner_request,
+            master=self.root
+        )
 
     def open_prisoner_add(self):
         PrisonerAddUI(
@@ -176,7 +197,12 @@ class MainMenuUI:
             guard_request=self.guard_request,
             master = self.root
         )
-        
+   
+    def search_cells(self):
+        CellsUI(
+            cells_request=self.cells_request,
+            master=self.root
+        )
 
     def back_to_menu(self):
         # eltüntetjük az aktuális win-t, visszaállítjuk a menüt
@@ -184,10 +210,7 @@ class MainMenuUI:
             self.win.pack_forget()
         self.menu_content.pack(padx=80, pady=60, fill="both", expand=True)
 
-    def open_prisoner_list(self):
-        PrisonerListUI(prisoner_request=self.prisoner_request, master=self.root)
-
-
+    
         
     def logout(self):
         confirm = messagebox.askyesno(
