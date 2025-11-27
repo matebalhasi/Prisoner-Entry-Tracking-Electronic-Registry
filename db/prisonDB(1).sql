@@ -75,6 +75,18 @@ CREATE TABLE Appeals (
     Sentence_ID INT REFERENCES Sentences(Sentence_ID)
 );
 
+CREATE TABLE Guard_Shifts (
+    Shift_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Guard_ID INT NOT NULL,
+    Shift_Day VARCHAR(20) NOT NULL,      -- e.g., Monday, Tuesday
+    Shift_Type VARCHAR(20) NOT NULL,     -- e.g., Morning, Night
+    Start_Time TIME NOT NULL,            -- HH:MM
+    End_Time TIME NOT NULL,              -- HH:MM
+    FOREIGN KEY (Guard_ID) REFERENCES Prison_Guard(Guard_ID)
+);
+
+
+
 CREATE TABLE Prisoner_Log (
     Log_ID SERIAL PRIMARY KEY,
     Deleted_At TIMESTAMP NOT NULL DEFAULT NOW(),
