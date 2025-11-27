@@ -84,32 +84,3 @@ CREATE TABLE Guard_Shifts (
     End_Time TIME NOT NULL,              -- HH:MM
     FOREIGN KEY (Guard_ID) REFERENCES Prison_Guard(Guard_ID)
 );
-
-
-
-CREATE TABLE Prisoner_Log (
-    Log_ID SERIAL PRIMARY KEY,
-    Deleted_At TIMESTAMP NOT NULL DEFAULT NOW(),
-    ID INT,
-    Birth_Date DATE,
-    F_Name VARCHAR(50),
-    L_Name VARCHAR(50),
-    Danger_Level VARCHAR(50),
-    Prison_ID INT,
-    Cell_Number INT
-);
-CREATE OR REPLACE FUNCTION log_prisoner_delete()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO Prisoner_Log(ID, Birth_Date, F_Name, L_Name, Danger_Level, Prison_ID, Cell_Number)
-    VALUES (OLD.ID, OLD.Birth_Date, OLD.F_Name, OLD.L_Name, OLD.Danger_Level, OLD.Prison_ID, OLD.Cell_Number);
-
-    RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_log_prisoner_delete
-AFTER DELETE ON Prisoner
-FOR EACH ROW
-EXECUTE FUNCTION log_prisoner_delete();
-
